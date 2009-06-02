@@ -54,7 +54,7 @@ namespace FileSystemSnarl
         private WindowState m_storedWindowState = WindowState.Normal;
         
         static DateTime lastNotification = new DateTime();
-
+        static System.IO.FileSystemWatcher watcher = new System.IO.FileSystemWatcher();
 
         private System.Windows.Forms.NotifyIcon m_notifyIcon;
 
@@ -265,7 +265,7 @@ System.Windows.Media.Color.FromRgb(255, 255, 255)
 
 
                 // Create a new FileSystemWatcher and set its properties.
-                System.IO.FileSystemWatcher watcher = new System.IO.FileSystemWatcher();
+                
                 //watcher.Path = "\\\\10.58.2.196\\fcdata\\Images\\20090602";
                 watcher.Path = textFieldWatchedFolder.Text;
                 /* Watch for changes in LastAccess and LastWrite times, and 
@@ -275,7 +275,8 @@ System.Windows.Media.Color.FromRgb(255, 255, 255)
                    | NotifyFilters.FileName | NotifyFilters.DirectoryName;
                 // Only watch text files.
                 //watcher.Filter = "*.txt";
-                watcher.Filter = "*.*";
+                watcher.Filter = "*.rdy";
+                
                 watcher.IncludeSubdirectories = true;
 
                 // Add event handlers.
@@ -307,6 +308,8 @@ System.Windows.Media.Color.FromRgb(255, 255, 255)
                 {
                     myNetwork.unregister(host, port, appName);
                 }
+
+                watcher.EnableRaisingEvents = false;
                 startButton.Content = "Start forwarding";
                 startButton.Background = new System.Windows.Media.SolidColorBrush(
                 System.Windows.Media.Color.FromRgb(0, 150, 0)
