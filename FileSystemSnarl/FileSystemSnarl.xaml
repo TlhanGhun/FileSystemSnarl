@@ -1,0 +1,38 @@
+﻿<Window x:Class="FileSystemSnarl.FileSystemSnarlClass"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="Events2Snarl" Height="393" Width="442" Background="BurlyWood" Visibility="Visible" Name="mainWindow" Closing="OnClose" StateChanged="OnStateChanged" IsVisibleChanged="OnIsVisibleChanged" IsEnabled="True" Icon="/FileSystemSnarl;component/FileSystemSnarl.ico">
+    <Grid Background="LavenderBlush" Width="420" Height="354" ClipToBounds="False">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="108*" />
+            <RowDefinition Height="132*" />
+        </Grid.RowDefinitions>
+        <Label Margin="12,0,10,0" Name="info" Height="27" VerticalAlignment="Bottom" Visibility="Visible" Grid.Row="1" ForceCursor="False">Licensed under GPL, see http://tlhan-ghun.de/</Label>
+        <TextBox Height="21" Margin="136,15.5,0,0" Name="fieldDisplayTime" VerticalAlignment="Top" VerticalContentAlignment="Center" Visibility="Visible" HorizontalAlignment="Left" Width="27" TextChanged="fieldDisplayTime_TextChanged">20</TextBox>
+        <Label Height="26.5" Margin="12,15.5,0,0" Name="label3" VerticalAlignment="Top" IsEnabled="True" HorizontalAlignment="Left" Width="118">Display time (seconds)</Label>
+        <RadioButton Margin="12,48,0,0" Name="radioButton1" IsChecked="True" GroupName="LocalOrRemote" Checked="radioButton1_Checked" Height="14" HorizontalAlignment="Left" VerticalAlignment="Top" Width="105" IsEnabled="True">Local</RadioButton>
+        <RadioButton Margin="11,68,0,75" Name="radioButton2" HorizontalAlignment="Left" Width="119" GroupName="LocalOrRemote" Checked="radioButton2_Checked" IsEnabled="True">Remote</RadioButton>
+        <Label Margin="33,82,0,0" Name="label4" HorizontalAlignment="Left" Width="84" Height="33" VerticalAlignment="Top" Grid.RowSpan="2">Forward to IP</Label>
+        <Label Margin="33,111,107,0" Name="label5" Height="57" VerticalAlignment="Top" Grid.RowSpan="2">Forward to port</Label>
+        <TextBox Margin="136,0,202,54.3" Name="targetIP" TextChanged="targetIP_TextChanged" Height="23" VerticalAlignment="Bottom" IsEnabled="True">127.0.0.1</TextBox>
+        <TextBox Margin="137,0,0,23" Name="targetPort" TextChanged="targetPort_TextChanged" Height="25" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="81" IsEnabled="True">9887</TextBox>
+        <Button Margin="0,15.5,22,75" Name="startButton" Click="startButton_Click" Background="Gray" Foreground="White" HorizontalAlignment="Right" Width="165" IsEnabled="False">Start forwarding</Button>
+        <CheckBox Height="16" HorizontalAlignment="Left" Margin="12,151,0,0" Name="checkBoxFilterType" VerticalAlignment="Top" Width="120" Checked="checkBoxFilterType_Checked" Unchecked="checkBoxFilterType_Unchecked" Grid.RowSpan="2" IsEnabled="True">Filter type</CheckBox>
+        <TextBox Height="23" Margin="221,145,0,0" Name="textBoxFilterTypeShow" VerticalAlignment="Top" HorizontalAlignment="Left" Width="187" Grid.RowSpan="2" IsEnabled="False" TextChanged="textBoxFilterTypeShow_TextChanged" />
+        <RadioButton Height="16" Margin="136,152,164,0" Name="radioButtonFilterTypeShowOnly" VerticalAlignment="Top" IsChecked="True" Grid.RowSpan="2" IsEnabled="False" Checked="radioButtonFilterTypeShowOnly_Checked" GroupName="filterType">Show only</RadioButton>
+        <RadioButton Height="16" Margin="136,22,164,0" Name="radioButtonFilterTypeAvoid" VerticalAlignment="Top" Grid.Row="1" IsEnabled="False" Checked="radioButtonFilterTypeAvoid_Checked" GroupName="filterType">Don't show</RadioButton>
+        <TextBox Height="23" HorizontalAlignment="Right" Margin="0,15,12,0" Name="textBoxFilterTypeDont" VerticalAlignment="Top" Width="187" Grid.Row="1" IsEnabled="False" TextChanged="textBoxFilterTypeDont_TextChanged" />
+        <CheckBox Height="16" HorizontalAlignment="Left" Margin="14,0,0,59" Name="checkBoxFilterMessage" VerticalAlignment="Bottom" Width="120" Grid.Row="1" IsEnabled="True" Checked="checkBoxFilterMessage_Checked" Unchecked="checkBoxFilterMessage_unchecked">Filter message text</CheckBox>
+        <TextBox Height="23" HorizontalAlignment="Right" Margin="0,0,12,58" Name="textBoxFilterMsgShow" VerticalAlignment="Bottom" Width="187" Grid.Row="1" IsEnabled="False" TextChanged="textBoxFilterMsgShow_TextChanged" />
+        <RadioButton Height="16" IsChecked="True" Margin="138,0,162,58" Name="radioButtonFilterMsgShow" VerticalAlignment="Bottom" Grid.Row="1" IsEnabled="False" GroupName="filterMsg" Checked="radioButtonFilterMsgShow_Checked">Show only</RadioButton>
+        <RadioButton Height="16" Margin="138,0,162,29" Name="radioButtonFilterMsgDont" VerticalAlignment="Bottom" Grid.Row="1" IsEnabled="False" GroupName="filterMsg" Checked="radioButtonFilterMsgDont_Checked">Don't show</RadioButton>
+        <TextBox Height="23" HorizontalAlignment="Right" Margin="0,0,12,29" Name="textBoxFilterMsgDont" VerticalAlignment="Bottom" Width="187" Grid.Row="1" IsEnabled="False" TextChanged="textBoxFilterMsgDont_TextChanged" />
+        <CheckBox Height="16" HorizontalAlignment="Left" Margin="12,54,0,0" Name="checkBoxFilterSource" VerticalAlignment="Top" Width="120" Grid.Row="1" IsEnabled="True" Checked="checkBoxFilterSource_Checked" Unchecked="checkBoxFilterSource_unchecked">Filter source app</CheckBox>
+        <TextBox Height="23" Margin="181,63,52,0" Name="textBoxFilterSourceShow" VerticalAlignment="Top" Grid.Row="1" IsEnabled="False" TextChanged="textBoxFilterSourceShow_TextChanged" />
+        <RadioButton Height="16" IsChecked="True" Margin="136,55,164,0" Name="radioButtonFilterSourceShow" VerticalAlignment="Top" Grid.Row="1" IsEnabled="False" GroupName="filterSource" Checked="radioButtonFilterSourceShow_Checked">Show only</RadioButton>
+        <RadioButton Margin="136,84,164,95" Name="radioButtonFilterSourceDont" Grid.Row="1" IsEnabled="False" GroupName="filterSource" Checked="radioButtonFilterSourceDont_Checked">Don't show</RadioButton>
+        <TextBox HorizontalAlignment="Right" Margin="0,77,12,95" Name="textBoxFilterSourceDont" Width="187" Grid.Row="1" IsEnabled="False" TextChanged="textBoxFilterSourceDont_TextChanged" />
+        <Button Height="23" HorizontalAlignment="Right" Margin="0,0,52,26" Name="chooseFolder" VerticalAlignment="Bottom" Width="75" Click="chooseFolder_Click">Choose folder</Button>
+        <TextBox Height="23" HorizontalAlignment="Right" Margin="0,0,52,46" Name="textFieldWatchedFolder" VerticalAlignment="Bottom" Width="120" TextChanged="textFieldWatchedFolder_TextChanged" />
+    </Grid>
+</Window>

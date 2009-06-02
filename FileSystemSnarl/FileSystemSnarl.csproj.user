@@ -1,0 +1,8 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <StartArguments>-D 15 -R 192.168.0.100 -t local -filterMsg dont "Userenv" -start -m</StartArguments>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <StartArguments>-D 15 -R 192.168.0.100 -t local -filterMsg dont "Userenv" -start -m</StartArguments>
+  </PropertyGroup>
+</Project>
