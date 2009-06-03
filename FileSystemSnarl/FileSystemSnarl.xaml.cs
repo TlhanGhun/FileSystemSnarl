@@ -37,18 +37,6 @@ namespace FileSystemSnarl
         static string iconFileName = "FileSystemSnarl.ico";
         static string iconPath = "";
         static string toBeWatchedFolder = "";
-        static bool filterType = false;
-        static bool filterMsg = false;
-        static bool filterSource = false;
-        static bool filterTypeShow = true;
-        static bool filterMsgShow = true;
-        static bool filterSourceShow = true;
-        static string filterTypeTextShow = "";
-        static string filterMsgTextShow = "";
-        static string filterSourceTextShow = "";
-        static string filterTypeTextDont = "";
-        static string filterMsgTextDont = "";
-        static string filterSourceTextDont = "";
         static string lastFilename = "";
         static string lastType = "";
         private WindowState m_storedWindowState = WindowState.Normal;
@@ -244,6 +232,10 @@ System.Windows.Media.Color.FromRgb(255, 255, 255)
                 targetIP.IsEnabled = false;
                 targetPort.IsEnabled = false;
 
+                textBoxPath.IsEnabled = false;
+                checkBoxIncludeSubdirectories.IsEnabled = false;
+                textBoxFilter.IsEnabled = false;
+
 
 
                 Snarl.WindowsMessage winMsg = new Snarl.WindowsMessage();
@@ -267,17 +259,18 @@ System.Windows.Media.Color.FromRgb(255, 255, 255)
                 // Create a new FileSystemWatcher and set its properties.
                 
                 //watcher.Path = "\\\\10.58.2.196\\fcdata\\Images\\20090602";
-                watcher.Path = textFieldWatchedFolder.Text;
+                watcher.Path = textBoxPath.Text;
                 /* Watch for changes in LastAccess and LastWrite times, and 
                    the renaming of files or directories. */
                 //watcher.NotifyFilter = System.IO.NotifyFilters.LastAccess | NotifyFilters.LastWrite
                 watcher.NotifyFilter =  NotifyFilters.LastWrite | NotifyFilters.Size
                    | NotifyFilters.FileName | NotifyFilters.DirectoryName;
+                
                 // Only watch text files.
                 //watcher.Filter = "*.txt";
-                watcher.Filter = "*.rdy";
-                
-                watcher.IncludeSubdirectories = true;
+                watcher.Filter = textBoxFilter.Text;
+
+                watcher.IncludeSubdirectories = checkBoxIncludeSubdirectories.IsChecked.Value;
 
                 // Add event handlers.
                 watcher.Changed += new FileSystemEventHandler(OnChanged);
@@ -318,6 +311,10 @@ System.Windows.Media.Color.FromRgb(255, 255, 255)
                 radioButton2.IsEnabled = true;
                 targetIP.IsEnabled = true;
                 targetPort.IsEnabled = true;
+
+                textBoxPath.IsEnabled = true;
+                checkBoxIncludeSubdirectories.IsEnabled = true;
+                textBoxFilter.IsEnabled = true;
             }
         }
 
@@ -374,203 +371,20 @@ System.Windows.Media.Color.FromRgb(255, 255, 255)
                 m_notifyIcon.Visible = show;
         }
 
-        private void checkBoxFilterType_Checked(object sender, RoutedEventArgs e)
-        {
-            System.Windows.Controls.CheckBox temp = (System.Windows.Controls.CheckBox)sender;
-            if (temp.IsChecked.Value)
-            {
-                radioButtonFilterTypeShowOnly.IsEnabled = true;
-                radioButtonFilterTypeAvoid.IsEnabled = true;
-                textBoxFilterTypeDont.IsEnabled = true;
-                textBoxFilterTypeShow.IsEnabled = true;
-            }
-            filterType = true;
-        }
 
-        private void checkBoxFilterType_Unchecked(object sender, RoutedEventArgs e)
-        {
-            System.Windows.Controls.CheckBox temp = (System.Windows.Controls.CheckBox)sender;
-            if (!temp.IsChecked.Value)
-            {
-                radioButtonFilterTypeShowOnly.IsEnabled = false;
-                radioButtonFilterTypeAvoid.IsEnabled = false;
-                textBoxFilterTypeDont.IsEnabled = false;
-                textBoxFilterTypeShow.IsEnabled = false;
-            }
-            filterType = false;
-        }
 
-        private void radioButtonFilterTypeShowOnly_Checked(object sender, RoutedEventArgs e)
-        {
-            System.Windows.Controls.RadioButton temp = (System.Windows.Controls.RadioButton)sender;
-            if (temp.IsChecked.Value)
-            {
-                filterTypeShow = true;
-            }
-            else
-            {
-                filterTypeShow = false;
-            }
-        }
 
-        private void radioButtonFilterTypeAvoid_Checked(object sender, RoutedEventArgs e)
-        {
-            System.Windows.Controls.RadioButton temp = (System.Windows.Controls.RadioButton)sender;
-            if (temp.IsChecked.Value)
-            {
-                filterTypeShow = false;
-            }
-            else
-            {
-                filterTypeShow = true;
-            }
-        }
 
-        private void textBoxFilterTypeShow_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            System.Windows.Controls.TextBox temp = (System.Windows.Controls.TextBox)sender;
-            filterTypeTextShow = temp.Text;
-        }
 
-        private void textBoxFilterTypeDont_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            System.Windows.Controls.TextBox temp = (System.Windows.Controls.TextBox)sender;
-            filterTypeTextDont = temp.Text;
-        }
 
-        private void checkBoxFilterSource_unchecked(object sender, RoutedEventArgs e)
-        {
-            System.Windows.Controls.CheckBox temp = (System.Windows.Controls.CheckBox)sender;
-            if (!temp.IsChecked.Value)
-            {
-                radioButtonFilterSourceShow.IsEnabled = false;
-                radioButtonFilterSourceDont.IsEnabled = false;
-                textBoxFilterSourceDont.IsEnabled = false;
-                textBoxFilterSourceShow.IsEnabled = false;
-            }
-            filterSource = false;
-        }
 
-        private void checkBoxFilterSource_Checked(object sender, RoutedEventArgs e)
-        {
-            System.Windows.Controls.CheckBox temp = (System.Windows.Controls.CheckBox)sender;
-            if (temp.IsChecked.Value)
-            {
-                radioButtonFilterSourceShow.IsEnabled = true;
-                radioButtonFilterSourceDont.IsEnabled = true;
-                textBoxFilterSourceDont.IsEnabled = true;
-                textBoxFilterSourceShow.IsEnabled = true;
-            }
-            filterSource = true;
-        }
-
-        private void radioButtonFilterSourceShow_Checked(object sender, RoutedEventArgs e)
-        {
-            System.Windows.Controls.RadioButton temp = (System.Windows.Controls.RadioButton)sender;
-            if (temp.IsChecked.Value)
-            {
-                filterSourceShow = true;
-            }
-            else
-            {
-                filterSourceShow = false;
-            }
-        }
-
-        private void radioButtonFilterSourceDont_Checked(object sender, RoutedEventArgs e)
-        {
-            System.Windows.Controls.RadioButton temp = (System.Windows.Controls.RadioButton)sender;
-            if (temp.IsChecked.Value)
-            {
-                filterSourceShow = false;
-            }
-            else
-            {
-                filterSourceShow = true;
-            }
-        }
-
-        private void textBoxFilterSourceShow_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            System.Windows.Controls.TextBox temp = (System.Windows.Controls.TextBox)sender;
-            filterSourceTextShow = temp.Text;
-        }
-
-        private void textBoxFilterSourceDont_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            System.Windows.Controls.TextBox temp = (System.Windows.Controls.TextBox)sender;
-            filterSourceTextDont = temp.Text;
-        }
-
-        // Msg
-
-        private void checkBoxFilterMessage_unchecked(object sender, RoutedEventArgs e)
-        {
-            System.Windows.Controls.CheckBox temp = (System.Windows.Controls.CheckBox)sender;
-            if (!temp.IsChecked.Value)
-            {
-                radioButtonFilterMsgShow.IsEnabled = false;
-                radioButtonFilterMsgDont.IsEnabled = false;
-                textBoxFilterMsgDont.IsEnabled = false;
-                textBoxFilterMsgShow.IsEnabled = false;
-            }
-            filterMsg = false;
-        }
-
-        private void checkBoxFilterMessage_Checked(object sender, RoutedEventArgs e)
-        {
-            System.Windows.Controls.CheckBox temp = (System.Windows.Controls.CheckBox)sender;
-            if (temp.IsChecked.Value)
-            {
-                radioButtonFilterMsgShow.IsEnabled = true;
-                radioButtonFilterMsgDont.IsEnabled = true;
-                textBoxFilterMsgDont.IsEnabled = true;
-                textBoxFilterMsgShow.IsEnabled = true;
-            }
-            filterMsg = true;
-        }
-
-        private void radioButtonFilterMsgShow_Checked(object sender, RoutedEventArgs e)
-        {
-            System.Windows.Controls.RadioButton temp = (System.Windows.Controls.RadioButton)sender;
-            if (temp.IsChecked.Value)
-            {
-                filterMsgShow = true;
-            }
-            else
-            {
-                filterMsgShow = false;
-            }
-        }
-
-        private void radioButtonFilterMsgDont_Checked(object sender, RoutedEventArgs e)
-        {
-            System.Windows.Controls.RadioButton temp = (System.Windows.Controls.RadioButton)sender;
-            if (temp.IsChecked.Value)
-            {
-                filterMsgShow = false;
-            }
-            else
-            {
-                filterMsgShow = true;
-            }
-        }
-
-        private void textBoxFilterMsgShow_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            System.Windows.Controls.TextBox temp = (System.Windows.Controls.TextBox)sender;
-            filterMsgTextShow = temp.Text;
-        }
-
-        private void textBoxFilterMsgDont_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            System.Windows.Controls.TextBox temp = (System.Windows.Controls.TextBox)sender;
-            filterMsgTextDont = temp.Text;
-        }
+  
 
         private void parseCommandLineArguments(string[] commandLine)
         {
             return;
+
+            /*
             bool directStart = false;
             bool minimized = false;
             string temp = "";
@@ -715,6 +529,7 @@ System.Windows.Media.Color.FromRgb(255, 255, 255)
                 mainWindow.Visibility = Visibility.Hidden;
 
             }
+             * */
         }
 
         private void hideNow(object source, EventArgs e ) {
@@ -731,7 +546,7 @@ System.Windows.Media.Color.FromRgb(255, 255, 255)
             if (result == System.Windows.Forms.DialogResult.OK)
             {
                 toBeWatchedFolder = folderBrowser.SelectedPath;
-                textFieldWatchedFolder.Text = folderBrowser.SelectedPath;
+                textBoxPath.Text = folderBrowser.SelectedPath;
             }
 
         }
@@ -745,6 +560,7 @@ System.Windows.Media.Color.FromRgb(255, 255, 255)
                 startButton.Background = new System.Windows.Media.SolidColorBrush(
 System.Windows.Media.Color.FromRgb(0, 150, 0)
                                    );
+                startButton.Content = "Start watching";
             }
             else
             {
@@ -752,6 +568,8 @@ System.Windows.Media.Color.FromRgb(0, 150, 0)
                 startButton.Background = new System.Windows.Media.SolidColorBrush(
 System.Windows.Media.Color.FromRgb(150, 150, 150)
                                    );
+                startButton.Content = "Choose folder first";
+                
             }
         }
     }
