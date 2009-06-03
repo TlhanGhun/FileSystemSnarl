@@ -180,17 +180,8 @@ System.Windows.Media.Color.FromRgb(255, 255, 255)
                 return;
             }
         }
-        string alertClass = "New file created";
-        if (e.ChangeType.ToString() == "Changed")
-        {
-            alertClass = "File has been changed";
-        }
-        else if (e.ChangeType.ToString() == "Deleted")
-        {
-            alertClass = "File has been deleted";
-        }
-        // Specify what is done when a file is changed, created, or deleted.
-       //Console.WriteLine("File: " +  e.FullPath + " " + e.ChangeType);
+        
+       string alertClass = "File has been " + e.ChangeType.ToString().ToLower();
 
        if(lastFilename == e.Name && lastType == e.ChangeType.ToString()) {
            DateTime waitTime = lastNotification.AddSeconds(5);
@@ -201,7 +192,7 @@ System.Windows.Media.Color.FromRgb(255, 255, 255)
            }
        }
        
-       SnarlConnector.ShowMessage(alertClass, e.Name + "\n\n" + e.ChangeType.ToString(), 10, iconPath, hwnd, Snarl.WindowsMessage.WM_USER + 13);
+       SnarlConnector.ShowMessageEx(alertClass,alertClass, e.Name + "\n\n" + e.ChangeType.ToString(), 10, iconPath, hwnd, Snarl.WindowsMessage.WM_USER + 13,"");
         lastType = e.ChangeType.ToString();
         lastFilename = e.Name;
         lastNotification = DateTime.Now;
@@ -210,9 +201,7 @@ System.Windows.Media.Color.FromRgb(255, 255, 255)
 
    static void OnRenamed( object source, RenamedEventArgs e )
    {
-      // Specify what is done when a file is renamed.
-      //Console::WriteLine( "File: {0} renamed to {1}", e->OldFullPath, e->FullPath );
-       SnarlConnector.ShowMessage("File has been renamed", "File has been renamed from " + e.OldName + " to " + e.Name, 10, iconPath, hwnd, Snarl.WindowsMessage.WM_USER + 13);
+       SnarlConnector.ShowMessageEx("File has been renamed", "File has been renamed", "File has been renamed from " + e.OldName + " to " + e.Name, 10, iconPath, hwnd, Snarl.WindowsMessage.WM_USER + 13,"");
    }
 
 
@@ -246,7 +235,10 @@ System.Windows.Media.Color.FromRgb(255, 255, 255)
                     hwnd = new System.Windows.Interop.HwndSource(winParams).Handle;
 
                     SnarlConnector.RegisterConfig(hwnd, "FileSystemSnarl", winMsg, iconPath);
-                    SnarlConnector.RegisterAlert("FileSystemSnarl", "Log added");
+                    SnarlConnector.RegisterAlert("FileSystemSnarl", "File has been created");
+                    SnarlConnector.RegisterAlert("FileSystemSnarl", "File has been changed");
+                    SnarlConnector.RegisterAlert("FileSystemSnarl", "File has been renamed");
+                    SnarlConnector.RegisterAlert("FileSystemSnarl", "File has been delected");
                 }
                 else
                 {
@@ -255,19 +247,49 @@ System.Windows.Media.Color.FromRgb(255, 255, 255)
                     myNetwork.addClass(host, port, appName, "Log added", "Log added");
                 }
 
-
-                // Create a new FileSystemWatcher and set its properties.
-                
-                //watcher.Path = "\\\\10.58.2.196\\fcdata\\Images\\20090602";
                 watcher.Path = textBoxPath.Text;
-                /* Watch for changes in LastAccess and LastWrite times, and 
-                   the renaming of files or directories. */
-                //watcher.NotifyFilter = System.IO.NotifyFilters.LastAccess | NotifyFilters.LastWrite
-                watcher.NotifyFilter =  NotifyFilters.LastWrite | NotifyFilters.Size
-                   | NotifyFilters.FileName | NotifyFilters.DirectoryName;
+                ////watcher.NotifyFilter = System.IO.NotifyFilters.LastAccess | NotifyFilters.LastWrite
+                //watcher.NotifyFilter =  NotifyFilters.LastWrite | NotifyFilters.Size
+                //   | NotifyFilters.FileName | NotifyFilters.DirectoryName;
+
+                NotifyFilters myFilter = new NotifyFilters();
+                NotifyFilters emptyFilter = new NotifyFilters();
+   
+                if (checkBoxAttributes.IsChecked.Value)
+                {
+                    myFilter = NotifyFilters.Attributes;
+                }
+                if (checkBoxDirectoryName.IsChecked.Value)
+                {
+                    myFilter = myFilter | NotifyFilters.DirectoryName;
+                }
+                if (checkBoxFilename.IsChecked.Value)
+                {
+                    myFilter = myFilter | NotifyFilters.FileName;
+                }
+                if (checkBoxLastAccess.IsChecked.Value)
+                {
+                    myFilter = myFilter | NotifyFilters.LastAccess;
+                }
+                if (checkBoxLastWrite.IsChecked.Value)
+                {
+                    myFilter = myFilter | NotifyFilters.LastWrite;
+                }
+                if (checkBoxSize.IsChecked.Value)
+                {
+                    myFilter = myFilter | NotifyFilters.Size;
+                }
+
+                if (myFilter != emptyFilter)
+                {
+                    watcher.NotifyFilter = myFilter;
+                }
+                else
+                {
+                    watcher.NotifyFilter = NotifyFilters.FileName;
+                    
+                }
                 
-                // Only watch text files.
-                //watcher.Filter = "*.txt";
                 watcher.Filter = textBoxFilter.Text;
 
                 watcher.IncludeSubdirectories = checkBoxIncludeSubdirectories.IsChecked.Value;
@@ -279,15 +301,6 @@ System.Windows.Media.Color.FromRgb(255, 255, 255)
                 watcher.Renamed += new RenamedEventHandler(OnRenamed);
 
                 watcher.EnableRaisingEvents = true;
-
-
-                return;
-
-
-                EventLog[] allLogs = EventLog.GetEventLogs();
-
- 
-
 
             }
             else
