@@ -43,6 +43,7 @@ namespace FileSystemSnarl
         
         static DateTime lastNotification = new DateTime();
         static System.IO.FileSystemWatcher watcher = new System.IO.FileSystemWatcher();
+        private static NativeWindowApplication.snarlMsgWnd snarlComWindow;
 
         private System.Windows.Forms.NotifyIcon m_notifyIcon;
 
@@ -192,10 +193,14 @@ System.Windows.Media.Color.FromRgb(255, 255, 255)
            }
        }
        
-       SnarlConnector.ShowMessageEx(alertClass,alertClass, e.Name + "\n\n" + e.ChangeType.ToString(), 10, iconPath, hwnd, Snarl.WindowsMessage.WM_USER + 13,"");
+       int id = SnarlConnector.ShowMessageEx(alertClass,alertClass, e.Name + "\n\n" + e.ChangeType.ToString(), 10, iconPath, hwnd, Snarl.WindowsMessage.WM_USER + 11,"");
         lastType = e.ChangeType.ToString();
         lastFilename = e.Name;
         lastNotification = DateTime.Now;
+        if (e.ChangeType.ToString() != "Deleted")
+        {
+            snarlComWindow.memoPath(id, e.FullPath);
+        }
     }
 
 
@@ -227,13 +232,15 @@ System.Windows.Media.Color.FromRgb(255, 255, 255)
 
 
 
-                Snarl.WindowsMessage winMsg = new Snarl.WindowsMessage();
+                Snarl.WindowsMessage winMsg = Snarl.WindowsMessage.WM_USER + 10;
                 if (local)
                 {
-                    System.Windows.Interop.HwndSourceParameters winParams = new System.Windows.Interop.HwndSourceParameters();
 
-                    hwnd = new System.Windows.Interop.HwndSource(winParams).Handle;
-
+                    if (hwnd == IntPtr.Zero)
+                    {
+                        snarlComWindow = new NativeWindowApplication.snarlMsgWnd();
+                        hwnd = snarlComWindow.Handle;
+                    }
                     SnarlConnector.RegisterConfig(hwnd, "FileSystemSnarl", winMsg, iconPath);
                     SnarlConnector.RegisterAlert("FileSystemSnarl", "File has been created");
                     SnarlConnector.RegisterAlert("FileSystemSnarl", "File has been changed");
