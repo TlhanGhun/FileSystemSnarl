@@ -19,7 +19,7 @@ using Snarl;
 namespace FileSystemSnarl
 {
     /// <summary>
-    /// Interaction logic for Events2Snarl.xaml
+    /// Interaction logic for FileSystemSnarl.xaml
     /// </summary>
     /// 
 
@@ -33,7 +33,7 @@ namespace FileSystemSnarl
         static string appName = "FileSystemSnarl";
         static bool local = true;
         static bool isRunning = false;
-        static string version = "1.0b1";
+        static string version = "1.0";
         static string iconFileName = "FileSystemSnarl.ico";
         static string iconPath = "";
         static string toBeWatchedFolder = "";
@@ -192,21 +192,36 @@ System.Windows.Media.Color.FromRgb(255, 255, 255)
                return;
            }
        }
-       
-       int id = SnarlConnector.ShowMessageEx(alertClass,alertClass, e.Name + "\n\n" + e.ChangeType.ToString(), 10, iconPath, hwnd, Snarl.WindowsMessage.WM_USER + 11,"");
-        lastType = e.ChangeType.ToString();
-        lastFilename = e.Name;
-        lastNotification = DateTime.Now;
-        if (e.ChangeType.ToString() != "Deleted")
-        {
-            snarlComWindow.memoPath(id, e.FullPath);
-        }
+       if (local)
+       {
+           int id = SnarlConnector.ShowMessageEx(alertClass, alertClass, e.Name, displayTime, iconPath, hwnd, Snarl.WindowsMessage.WM_USER + 11, "");
+           
+           if (e.ChangeType.ToString() != "Deleted")
+           {
+               snarlComWindow.memoPath(id, e.FullPath);
+           }
+       }
+       else
+       {
+           myNetwork.notify(host, port, appName, alertClass, alertClass, e.Name, displayTime.ToString());
+       }
+       lastType = e.ChangeType.ToString();
+       lastFilename = e.Name;
+       lastNotification = DateTime.Now;
+
     }
 
 
    static void OnRenamed( object source, RenamedEventArgs e )
    {
-       SnarlConnector.ShowMessageEx("File has been renamed", "File has been renamed", "File has been renamed from " + e.OldName + " to " + e.Name, 10, iconPath, hwnd, Snarl.WindowsMessage.WM_USER + 13,"");
+       if (local)
+       {
+           SnarlConnector.ShowMessageEx("File has been renamed", "File has been renamed", "File has been renamed from " + e.OldName + " to " + e.Name, displayTime, iconPath, hwnd, Snarl.WindowsMessage.WM_USER + 13, "");
+       }
+       else
+       {
+           myNetwork.notify(host, port, appName, "File has been renamed", "File has been renamed", "File has been renamed from " + e.OldName + " to " + e.Name, displayTime.ToString());
+       }
    }
 
 
@@ -218,8 +233,8 @@ System.Windows.Media.Color.FromRgb(255, 255, 255)
                 isRunning = true;
                 startButton.Content = "Stop watching";
                 startButton.Background = new System.Windows.Media.SolidColorBrush(
-                System.Windows.Media.Color.FromRgb(150, 0, 0)
-                                                   );
+                                                System.Windows.Media.Color.FromRgb(150, 0, 0)
+                                                );
 
                 radioButton1.IsEnabled = false;
                 radioButton2.IsEnabled = false;
@@ -230,6 +245,18 @@ System.Windows.Media.Color.FromRgb(255, 255, 255)
                 checkBoxIncludeSubdirectories.IsEnabled = false;
                 textBoxFilter.IsEnabled = false;
 
+                checkBoxAttributes.IsEnabled = false;
+                checkBoxChanged.IsEnabled = false;
+                checkBoxCreated.IsEnabled = false;
+                checkBoxDeleted.IsEnabled = false;
+                checkBoxLastAccess.IsEnabled = false;
+                checkBoxLastWrite.IsEnabled = false;
+                checkBoxRenamed.IsEnabled = false;
+                checkBoxSize.IsEnabled = false;
+                checkBoxDirectoryName.IsEnabled = false;
+                checkBoxFilename.IsEnabled = false;
+
+                chooseFolder.IsEnabled = false;
 
 
                 Snarl.WindowsMessage winMsg = Snarl.WindowsMessage.WM_USER + 10;
@@ -251,7 +278,10 @@ System.Windows.Media.Color.FromRgb(255, 255, 255)
                 {
                     myNetwork = new SnarlNetwork.SnarlNetwork(host, port);
                     myNetwork.register(host, port, appName);
-                    myNetwork.addClass(host, port, appName, "Log added", "Log added");
+                    myNetwork.addClass(host, port, appName, "File has been created", "File has been created");
+                    myNetwork.addClass(host, port, appName, "File has been changed", "File has been changed");
+                    myNetwork.addClass(host, port, appName, "File has been renamed", "File has been renamed");
+                    myNetwork.addClass(host, port, appName, "File has been deleted", "File has been deleted");
                 }
 
                 watcher.Path = textBoxPath.Text;
@@ -302,10 +332,22 @@ System.Windows.Media.Color.FromRgb(255, 255, 255)
                 watcher.IncludeSubdirectories = checkBoxIncludeSubdirectories.IsChecked.Value;
 
                 // Add event handlers.
-                watcher.Changed += new FileSystemEventHandler(OnChanged);
-                watcher.Created += new FileSystemEventHandler(OnChanged);
-                watcher.Deleted += new FileSystemEventHandler(OnChanged);
-                watcher.Renamed += new RenamedEventHandler(OnRenamed);
+                if (checkBoxChanged.IsChecked.Value)
+                {
+                    watcher.Changed += new FileSystemEventHandler(OnChanged);
+                }
+                if (checkBoxCreated.IsChecked.Value)
+                {
+                    watcher.Created += new FileSystemEventHandler(OnChanged);
+                }
+                if (checkBoxDeleted.IsChecked.Value)
+                {
+                    watcher.Deleted += new FileSystemEventHandler(OnChanged);
+                }
+                if (checkBoxRenamed.IsChecked.Value)
+                {
+                    watcher.Renamed += new RenamedEventHandler(OnRenamed);
+                }
 
                 watcher.EnableRaisingEvents = true;
 
@@ -335,6 +377,19 @@ System.Windows.Media.Color.FromRgb(255, 255, 255)
                 textBoxPath.IsEnabled = true;
                 checkBoxIncludeSubdirectories.IsEnabled = true;
                 textBoxFilter.IsEnabled = true;
+
+                checkBoxAttributes.IsEnabled = true;
+                checkBoxChanged.IsEnabled = true;
+                checkBoxCreated.IsEnabled = true;
+                checkBoxDeleted.IsEnabled = true;
+                checkBoxLastAccess.IsEnabled = true;
+                checkBoxLastWrite.IsEnabled = true;
+                checkBoxRenamed.IsEnabled = true;
+                checkBoxSize.IsEnabled = true;
+                checkBoxDirectoryName.IsEnabled = true;
+                checkBoxFilename.IsEnabled = true;
+
+                chooseFolder.IsEnabled = true;
             }
         }
 

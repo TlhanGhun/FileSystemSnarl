@@ -17,6 +17,7 @@
     <TargetFrameworkSubset>
     </TargetFrameworkSubset>
     <ApplicationIcon>FileSystemSnarl.ico</ApplicationIcon>
+    <StartupObject>FileSystemSnarl.App</StartupObject>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
