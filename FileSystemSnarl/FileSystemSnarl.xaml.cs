@@ -33,7 +33,7 @@ namespace FileSystemSnarl
         static string appName = "FileSystemSnarl";
         static bool local = true;
         static bool isRunning = false;
-        static string version = "1.0";
+        static string version = "1.1";
         static string iconFileName = "FileSystemSnarl.ico";
         static string iconPath = "";
         static string toBeWatchedFolder = "";
