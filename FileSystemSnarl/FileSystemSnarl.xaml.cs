@@ -33,7 +33,7 @@ namespace FileSystemSnarl
         static string appName = "FileSystemSnarl";
         static bool local = true;
         static bool isRunning = false;
-        static string version = "1.1";
+        static string version = "1.2";
         static string iconFileName = "FileSystemSnarl.ico";
         static string iconPath = "";
         static string toBeWatchedFolder = "";
@@ -55,7 +55,7 @@ namespace FileSystemSnarl
             
             this.mainWindow.Title = "FileSystemSnarl " + version;
             string[] commandLine = Environment.GetCommandLineArgs();
-            iconPath = System.IO.Path.GetDirectoryName(commandLine[0]) + "\\" + iconFileName;
+            iconPath = System.IO.Path.GetDirectoryName(System.Windows.Forms.Application.ExecutablePath) + "\\" + iconFileName;
 
             m_notifyIcon = new System.Windows.Forms.NotifyIcon();
             m_notifyIcon.Text = "FileSystemSnarl";
@@ -272,7 +272,7 @@ System.Windows.Media.Color.FromRgb(255, 255, 255)
                     SnarlConnector.RegisterAlert("FileSystemSnarl", "File has been created");
                     SnarlConnector.RegisterAlert("FileSystemSnarl", "File has been changed");
                     SnarlConnector.RegisterAlert("FileSystemSnarl", "File has been renamed");
-                    SnarlConnector.RegisterAlert("FileSystemSnarl", "File has been delected");
+                    SnarlConnector.RegisterAlert("FileSystemSnarl", "File has been deleted");
                 }
                 else
                 {
