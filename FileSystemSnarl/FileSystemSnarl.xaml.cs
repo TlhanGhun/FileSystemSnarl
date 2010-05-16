@@ -33,7 +33,7 @@ namespace FileSystemSnarl
         static string appName = "FileSystemSnarl";
         static bool local = true;
         static bool isRunning = false;
-        static string version = "1.2";
+        static string version = "1.3";
         static string iconFileName = "FileSystemSnarl.ico";
         static string iconPath = "";
         static string toBeWatchedFolder = "";
@@ -70,10 +70,10 @@ namespace FileSystemSnarl
 
         ~FileSystemSnarlClass()
         {
+            Properties.Settings.Default.Save();
             if (isRunning)
             {
                 SnarlConnector.RevokeConfig(hwnd);
-
             }
         }
 
