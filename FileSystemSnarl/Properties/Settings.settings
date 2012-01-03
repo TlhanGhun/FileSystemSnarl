@@ -2,7 +2,7 @@
 <SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="FileSystemSnarl.Properties" GeneratedClassName="Settings">
   <Profiles />
   <Settings>
-    <Setting Name="displayTime" Type="System.String" Scope="User">
+    <Setting Name="displayTime" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">20</Value>
     </Setting>
     <Setting Name="snpIp" Type="System.String" Scope="User">
@@ -55,6 +55,33 @@
     </Setting>
     <Setting Name="inactivityWatcher" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="templateRenamedTitle" Type="System.String" Scope="User">
+      <Value Profile="(Default)">File has been renamed</Value>
+    </Setting>
+    <Setting Name="templateRenamedBody" Type="System.String" Scope="User">
+      <Value Profile="(Default)">File has been renamed from %OLDNAME% to %NEWNAME%</Value>
+    </Setting>
+    <Setting Name="templateChangedTitle" Type="System.String" Scope="User">
+      <Value Profile="(Default)">File has been changed</Value>
+    </Setting>
+    <Setting Name="templateChangedBody" Type="System.String" Scope="User">
+      <Value Profile="(Default)">%FILENAME% has been changed</Value>
+    </Setting>
+    <Setting Name="templateCreatedTitle" Type="System.String" Scope="User">
+      <Value Profile="(Default)">File has been created</Value>
+    </Setting>
+    <Setting Name="templateCreatedBody" Type="System.String" Scope="User">
+      <Value Profile="(Default)">%FILENAME%</Value>
+    </Setting>
+    <Setting Name="templateDeletedTitle" Type="System.String" Scope="User">
+      <Value Profile="(Default)">File has been deleted</Value>
+    </Setting>
+    <Setting Name="templateDeletedBody" Type="System.String" Scope="User">
+      <Value Profile="(Default)">%FILENAME%</Value>
+    </Setting>
+    <Setting Name="templateFullContentMaxLength" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">300</Value>
     </Setting>
   </Settings>
 </SettingsFile>

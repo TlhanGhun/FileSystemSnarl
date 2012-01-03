@@ -7,7 +7,7 @@ using System.Text;
 
 namespace FileSystemSnarl.SnarlNetwork
 {
-    class SnarlNetwork
+    public class SnarlNetwork
     {
         int response = 0;
 
@@ -38,7 +38,7 @@ namespace FileSystemSnarl.SnarlNetwork
             return true;
         }
 
-        public bool unregister(string hostName, int hostPort,string appName)
+        public bool unregister(string hostName, int hostPort, string appName)
         {
             IPAddress host = IPAddress.Parse(hostName);
             IPEndPoint hostep = new IPEndPoint(host, hostPort);
@@ -80,7 +80,8 @@ namespace FileSystemSnarl.SnarlNetwork
                     sock.Close();
                 }
             }
-            try {
+            try
+            {
                 response = sock.Send(Encoding.ASCII.GetBytes("type=SNP#?version=1.0#?action=add_class#?app=" + appName + "#?class=" + className + "#?title=" + classTitle));
                 response = sock.Send(Encoding.ASCII.GetBytes("\r\n"));
             }

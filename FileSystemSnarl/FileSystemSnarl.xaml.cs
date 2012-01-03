@@ -14,115 +14,59 @@ using System.Windows.Shapes;
 using System.Diagnostics;
 using System.Threading;
 using System.IO;
-using Snarl;
+using FileSystemSnarl.Snarl;
 
 namespace FileSystemSnarl
 {
     /// <summary>
-    /// Interaction logic for FileSystemSnarl.xaml
+    /// Interaction logic for MainWindow.xaml
     /// </summary>
     /// 
 
-    public partial class FileSystemSnarlClass : Window
+    public partial class MainWindow : Window
     {
-        static int displayTime = 20;
-        static IntPtr hwnd = IntPtr.Zero;
-        static SnarlNetwork.SnarlNetwork myNetwork;
-        static string host = "127.0.0.1";
-        static int port = 9887;
-        static string appName = "FileSystemSnarl";
-        static bool local = true;
-        static bool isRunning = false;
-        static string version = "1.3";
-        static string iconFileName = "FileSystemSnarl.ico";
-        static string iconPath = "";
-        static string toBeWatchedFolder = "";
-        static string lastFilename = "";
-        static string lastType = "";
         private WindowState m_storedWindowState = WindowState.Normal;
-        
-        static DateTime lastNotification = new DateTime();
-        static System.IO.FileSystemWatcher watcher = new System.IO.FileSystemWatcher();
-        private static NativeWindowApplication.snarlMsgWnd snarlComWindow;
-
         private System.Windows.Forms.NotifyIcon m_notifyIcon;
 
-        public FileSystemSnarlClass()
+        public MainWindow()
         {
             InitializeComponent();
 
-            lastNotification = DateTime.Now;
-            
-            this.mainWindow.Title = "FileSystemSnarl " + version;
-            string[] commandLine = Environment.GetCommandLineArgs();
-            iconPath = System.IO.Path.GetDirectoryName(System.Windows.Forms.Application.ExecutablePath) + "\\" + iconFileName;
+            this.Title = "FileSystemSnarl " + AppController.Current.FormattedVersionString;
 
             m_notifyIcon = new System.Windows.Forms.NotifyIcon();
-            m_notifyIcon.Text = "FileSystemSnarl";
-            m_notifyIcon.Icon = new System.Drawing.Icon(iconFileName);
+            m_notifyIcon.Text = "FileSystemSnarl " + AppController.Current.FormattedVersionString;;
+            m_notifyIcon.Icon = new System.Drawing.Icon("FileSystemSnarl.ico");
             m_notifyIcon.DoubleClick += new EventHandler(m_notifyIcon_Click);
-
-            if (commandLine.Length > 1)
-            {
-                parseCommandLineArguments(commandLine);
-            }
         }
-
-        ~FileSystemSnarlClass()
-        {
-            Properties.Settings.Default.Save();
-            if (isRunning)
-            {
-                SnarlConnector.RevokeConfig(hwnd);
-            }
-        }
-
-
-        private void onNewEventLogEntry(object source, EntryWrittenEventArgs e)
-        {
-            EventLog myEvent = (EventLog)source;
-
-
-        }
-
-  
+ 
         private void targetIP_TextChanged(object sender, TextChangedEventArgs e)
         {
             System.Net.IPAddress testIP;
-            // System.Net.IPHostEntry hostInfo = System.Net.Dns.GetHostByName(temp.Text);
-            // very slow in this way
-            System.Windows.Controls.TextBox temp = (System.Windows.Controls.TextBox)sender;
-            if (System.Net.IPAddress.TryParse(temp.Text, out testIP))
+            TextBox textbox = sender as TextBox;
+            if (System.Net.IPAddress.TryParse(textbox.Text, out testIP))
             {
-                host = temp.Text;
-                targetIP.Background = new System.Windows.Media.SolidColorBrush(
-               System.Windows.Media.Color.FromRgb(255, 255, 255)
-                                                  );
+                Properties.Settings.Default.snpIp = textbox.Text;
+                targetIP.Background = Brushes.White;
             }
             else
             {
-                targetIP.Background = new System.Windows.Media.SolidColorBrush(
-                System.Windows.Media.Color.FromRgb(255, 150, 150)
-                                                   );
+                targetIP.Background = Brushes.Red;
             }
         }
 
         private void targetPort_TextChanged(object sender, TextChangedEventArgs e)
         {
-            System.Windows.Controls.TextBox temp = (System.Windows.Controls.TextBox)sender;
+            TextBox textbox = sender as TextBox;
             try
             {
-                int newPort = Convert.ToInt32(temp.Text);
-                port = newPort;
-                targetPort.Background = new System.Windows.Media.SolidColorBrush(
-System.Windows.Media.Color.FromRgb(255, 255, 255)
-                                   );
+                int newPort = Convert.ToInt32(textbox.Text);
+                Properties.Settings.Default.snpPort = newPort;
+                targetPort.Background = Brushes.White;
             }
             catch
             {
-                targetPort.Background = new System.Windows.Media.SolidColorBrush(
-                System.Windows.Media.Color.FromRgb(255, 150, 150)
-                                                   );
+                targetPort.Background = Brushes.Red;
             }
         }
 
@@ -130,275 +74,62 @@ System.Windows.Media.Color.FromRgb(255, 255, 255)
         {
             try
             {
-                System.Windows.Controls.TextBox temp = (System.Windows.Controls.TextBox)sender;
-                int newValue = Convert.ToInt32(temp.Text);
-                displayTime = newValue;
-                fieldDisplayTime.Background = new System.Windows.Media.SolidColorBrush(
-               System.Windows.Media.Color.FromRgb(255, 255, 255)
-                                                  );
+                TextBox textbox = sender as TextBox;
+                int newValue = Convert.ToInt32(textbox.Text);
+                Properties.Settings.Default.displayTime = newValue;
+                fieldDisplayTime.Background = Brushes.White;
             }
             catch
             {
-                fieldDisplayTime.Background = new System.Windows.Media.SolidColorBrush(
-               System.Windows.Media.Color.FromRgb(255, 150, 150)
-                                                  );
+                fieldDisplayTime.Background = Brushes.Red;
             }
         }
 
-        private void radioButton1_Checked(object sender, RoutedEventArgs e)
+        private void radioButtonUseLocalNotifications_Checked(object sender, RoutedEventArgs e)
         {
-
-            System.Windows.Controls.RadioButton temp = (System.Windows.Controls.RadioButton)sender;
-            if (temp.IsChecked == true)
+            RadioButton radiobutton = sender as RadioButton;
+            if (radiobutton.IsChecked == true)
             {
-                local = true;
+                Properties.Settings.Default.snarlLocal = true;
             }
             else
             {
-                local = false;
+                Properties.Settings.Default.snarlLocal = false;
             }
         }
 
-        private void radioButton2_Checked(object sender, RoutedEventArgs e)
+        private void radioButtonUseSnpNotifications_Checked(object sender, RoutedEventArgs e)
         {
-            System.Windows.Controls.RadioButton temp = (System.Windows.Controls.RadioButton)sender;
-            if (temp.IsChecked == true)
+            RadioButton radiobutton = sender as RadioButton;
+            if (radiobutton.IsChecked == false)
             {
-                local = false;
+                Properties.Settings.Default.snarlLocal = true;
             }
             else
             {
-                local = false;
+                Properties.Settings.Default.snarlLocal = false;
             }
         }
 
-    private static void OnChanged(object source, FileSystemEventArgs e)
-    {
-        if (e.Name.Length >= 5)
-        {
-            if (e.Name.Substring(0, 5) == "RECYC")
-            {
-                return;
-            }
-        }
-        
-       string alertClass = "File has been " + e.ChangeType.ToString().ToLower();
-
-       if(lastFilename == e.Name && lastType == e.ChangeType.ToString()) {
-           DateTime waitTime = lastNotification.AddSeconds(5);
-           if (lastNotification < waitTime)
-           {
-               // we just had this one...
-               return;
-           }
-       }
-       if (local)
-       {
-           int id = SnarlConnector.ShowMessageEx(alertClass, alertClass, e.Name, displayTime, iconPath, hwnd, Snarl.WindowsMessage.WM_USER + 11, "");
-           
-           if (e.ChangeType.ToString() != "Deleted")
-           {
-               snarlComWindow.memoPath(id, e.FullPath);
-           }
-       }
-       else
-       {
-           myNetwork.notify(host, port, appName, alertClass, alertClass, e.Name, displayTime.ToString());
-       }
-       lastType = e.ChangeType.ToString();
-       lastFilename = e.Name;
-       lastNotification = DateTime.Now;
-
-    }
-
-
-   static void OnRenamed( object source, RenamedEventArgs e )
-   {
-       if (local)
-       {
-           SnarlConnector.ShowMessageEx("File has been renamed", "File has been renamed", "File has been renamed from " + e.OldName + " to " + e.Name, displayTime, iconPath, hwnd, Snarl.WindowsMessage.WM_USER + 13, "");
-       }
-       else
-       {
-           myNetwork.notify(host, port, appName, "File has been renamed", "File has been renamed", "File has been renamed from " + e.OldName + " to " + e.Name, displayTime.ToString());
-       }
-   }
-
+  
 
 
         private void startButton_Click(object sender, RoutedEventArgs e)
         {
-            if (!isRunning)
-            {
-                isRunning = true;
-                startButton.Content = "Stop watching";
-                startButton.Background = new System.Windows.Media.SolidColorBrush(
-                                                System.Windows.Media.Color.FromRgb(150, 0, 0)
-                                                );
-
-                radioButton1.IsEnabled = false;
-                radioButton2.IsEnabled = false;
-                targetIP.IsEnabled = false;
-                targetPort.IsEnabled = false;
-
-                textBoxPath.IsEnabled = false;
-                checkBoxIncludeSubdirectories.IsEnabled = false;
-                textBoxFilter.IsEnabled = false;
-
-                checkBoxAttributes.IsEnabled = false;
-                checkBoxChanged.IsEnabled = false;
-                checkBoxCreated.IsEnabled = false;
-                checkBoxDeleted.IsEnabled = false;
-                checkBoxLastAccess.IsEnabled = false;
-                checkBoxLastWrite.IsEnabled = false;
-                checkBoxRenamed.IsEnabled = false;
-                checkBoxSize.IsEnabled = false;
-                checkBoxDirectoryName.IsEnabled = false;
-                checkBoxFilename.IsEnabled = false;
-
-                chooseFolder.IsEnabled = false;
-
-
-                Snarl.WindowsMessage winMsg = Snarl.WindowsMessage.WM_USER + 10;
-                if (local)
-                {
-
-                    if (hwnd == IntPtr.Zero)
-                    {
-                        snarlComWindow = new NativeWindowApplication.snarlMsgWnd();
-                        hwnd = snarlComWindow.Handle;
-                    }
-                    SnarlConnector.RegisterConfig(hwnd, "FileSystemSnarl", winMsg, iconPath);
-                    SnarlConnector.RegisterAlert("FileSystemSnarl", "File has been created");
-                    SnarlConnector.RegisterAlert("FileSystemSnarl", "File has been changed");
-                    SnarlConnector.RegisterAlert("FileSystemSnarl", "File has been renamed");
-                    SnarlConnector.RegisterAlert("FileSystemSnarl", "File has been deleted");
-                }
-                else
-                {
-                    myNetwork = new SnarlNetwork.SnarlNetwork(host, port);
-                    myNetwork.register(host, port, appName);
-                    myNetwork.addClass(host, port, appName, "File has been created", "File has been created");
-                    myNetwork.addClass(host, port, appName, "File has been changed", "File has been changed");
-                    myNetwork.addClass(host, port, appName, "File has been renamed", "File has been renamed");
-                    myNetwork.addClass(host, port, appName, "File has been deleted", "File has been deleted");
-                }
-
-                watcher.Path = textBoxPath.Text;
-                ////watcher.NotifyFilter = System.IO.NotifyFilters.LastAccess | NotifyFilters.LastWrite
-                //watcher.NotifyFilter =  NotifyFilters.LastWrite | NotifyFilters.Size
-                //   | NotifyFilters.FileName | NotifyFilters.DirectoryName;
-
-                NotifyFilters myFilter = new NotifyFilters();
-                NotifyFilters emptyFilter = new NotifyFilters();
-   
-                if (checkBoxAttributes.IsChecked.Value)
-                {
-                    myFilter = NotifyFilters.Attributes;
-                }
-                if (checkBoxDirectoryName.IsChecked.Value)
-                {
-                    myFilter = myFilter | NotifyFilters.DirectoryName;
-                }
-                if (checkBoxFilename.IsChecked.Value)
-                {
-                    myFilter = myFilter | NotifyFilters.FileName;
-                }
-                if (checkBoxLastAccess.IsChecked.Value)
-                {
-                    myFilter = myFilter | NotifyFilters.LastAccess;
-                }
-                if (checkBoxLastWrite.IsChecked.Value)
-                {
-                    myFilter = myFilter | NotifyFilters.LastWrite;
-                }
-                if (checkBoxSize.IsChecked.Value)
-                {
-                    myFilter = myFilter | NotifyFilters.Size;
-                }
-
-                if (myFilter != emptyFilter)
-                {
-                    watcher.NotifyFilter = myFilter;
-                }
-                else
-                {
-                    watcher.NotifyFilter = NotifyFilters.FileName;
-                    
-                }
-                
-                watcher.Filter = textBoxFilter.Text;
-
-                watcher.IncludeSubdirectories = checkBoxIncludeSubdirectories.IsChecked.Value;
-
-                // Add event handlers.
-                if (checkBoxChanged.IsChecked.Value)
-                {
-                    watcher.Changed += new FileSystemEventHandler(OnChanged);
-                }
-                if (checkBoxCreated.IsChecked.Value)
-                {
-                    watcher.Created += new FileSystemEventHandler(OnChanged);
-                }
-                if (checkBoxDeleted.IsChecked.Value)
-                {
-                    watcher.Deleted += new FileSystemEventHandler(OnChanged);
-                }
-                if (checkBoxRenamed.IsChecked.Value)
-                {
-                    watcher.Renamed += new RenamedEventHandler(OnRenamed);
-                }
-
-                watcher.EnableRaisingEvents = true;
-
-            }
-            else
-            {
-                isRunning = false;
-                if (local)
-                {
-                    SnarlConnector.RevokeConfig(hwnd);
-                }
-                else
-                {
-                    myNetwork.unregister(host, port, appName);
-                }
-
-                watcher.EnableRaisingEvents = false;
-                startButton.Content = "Start forwarding";
-                startButton.Background = new System.Windows.Media.SolidColorBrush(
-                System.Windows.Media.Color.FromRgb(0, 150, 0)
-                                                   );
-                radioButton1.IsEnabled = true;
-                radioButton2.IsEnabled = true;
-                targetIP.IsEnabled = true;
-                targetPort.IsEnabled = true;
-
-                textBoxPath.IsEnabled = true;
-                checkBoxIncludeSubdirectories.IsEnabled = true;
-                textBoxFilter.IsEnabled = true;
-
-                checkBoxAttributes.IsEnabled = true;
-                checkBoxChanged.IsEnabled = true;
-                checkBoxCreated.IsEnabled = true;
-                checkBoxDeleted.IsEnabled = true;
-                checkBoxLastAccess.IsEnabled = true;
-                checkBoxLastWrite.IsEnabled = true;
-                checkBoxRenamed.IsEnabled = true;
-                checkBoxSize.IsEnabled = true;
-                checkBoxDirectoryName.IsEnabled = true;
-                checkBoxFilename.IsEnabled = true;
-
-                chooseFolder.IsEnabled = true;
-            }
+            AppController.Current.startWatching();
         }
 
-        // TrayIcon stuff
+        #region tray icon
 
         void OnClose(object sender, System.ComponentModel.CancelEventArgs args)
         {
-            m_notifyIcon.Dispose();
-            m_notifyIcon = null;
+            Properties.Settings.Default.Save();
+            try
+            {
+                m_notifyIcon.Dispose();
+                m_notifyIcon = null;
+            }
+            catch {}
         }
 
 
@@ -406,17 +137,17 @@ System.Windows.Media.Color.FromRgb(255, 255, 255)
         {
             if (WindowState == WindowState.Minimized)
             {
-                if (isRunning && local)
+                if (AppController.Current.isRunning && Properties.Settings.Default.snarlLocal)
                 {
-                    m_notifyIcon.Text = appName + " (local)";
+                    m_notifyIcon.Text = "FileSystemSnarl (local)";
                 }
-                else if (isRunning && !local)
+                else if (AppController.Current.isRunning && !Properties.Settings.Default.snarlLocal)
                 {
-                    m_notifyIcon.Text = appName + " (" + host + ")";
+                    m_notifyIcon.Text = "FileSystemSnarl (" + Properties.Settings.Default.snpIp + ")";
                 }
                 else
                 {
-                    m_notifyIcon.Text = appName + " (not connected)";
+                    m_notifyIcon.Text = "FileSystemSnarl (not connected)";
                 }
  
                 Hide();
@@ -444,173 +175,13 @@ System.Windows.Media.Color.FromRgb(255, 255, 255)
         {
             if (m_notifyIcon != null)
                 m_notifyIcon.Visible = show;
-        }
-
-
-
-
-
-
-
-
-  
-
-        private void parseCommandLineArguments(string[] commandLine)
-        {
-            return;
-
-            /*
-            bool directStart = false;
-            bool minimized = false;
-            string temp = "";
-            bool lastParam = false;
-            for (int i = 1; i != commandLine.Length; ++i)
-            {
-                temp = "";
-                if (i == commandLine.Length)
-                {
-                    lastParam = true;
-                }
-                switch (commandLine[i].ToUpper())
-                {
-                    case "-TYPE":
-                    case "-T":
-                        if (commandLine[++i].ToUpper() == "REMOTE")
-                        {
-                            radioButton2.IsChecked = true;
-                        }
-                        break;
-                    case "-REMOTEIP":
-                    case "-R":
-                        if (lastParam)
-                        {
-                            MessageBox.Show("Missing parameter for remote IP");
-                            break;
-                        }
-                        temp = commandLine[++i];
-                        targetIP.Text = temp;
-                        break;
-                    case "-PORT":
-                    case "-P":
-                        if (lastParam)
-                        {
-                            MessageBox.Show("Missing parameter for remote port");
-                            break;
-                        }
-                        temp = commandLine[++i];
-                        targetPort.Text = temp;
-                        break;
-                    case "-DISPLAYTIME":
-                    case "-D":
-                        if (lastParam)
-                        {
-                            MessageBox.Show("Missing parameter for display time");
-                            break;
-                        }
-                        temp = commandLine[++i];
-                        fieldDisplayTime.Text = temp;
-                        break;
-                    case "-START":
-                    case "-S":
-                        directStart = true;
-                        break;
-                    case "-FILTERTYPE":
-                        if (i + 2 >= commandLine.Length)
-                        {
-                            MessageBox.Show("Not enough parameters for filterType");
-                            break;
-                        }
-                        filterType = true;
-                        checkBoxFilterType.IsChecked = true;
-                        temp = commandLine[++i].ToUpper();
-                        if (temp == "SHOW")
-                        {
-                            radioButtonFilterTypeShowOnly.IsChecked = true;
-                            textBoxFilterTypeShow.Text = commandLine[++i];
-                        }
-                        else if (temp == "DONT")
-                        {
-                            radioButtonFilterTypeAvoid.IsChecked = true;
-                            textBoxFilterTypeDont.Text = commandLine[++i];
-                        }
-                        break;
-                    case "-FILTERSOURCE":
-                        if (i + 2 >= commandLine.Length)
-                        {
-                            MessageBox.Show("Not enough parameters for filterSource");
-                            break;
-                        }
-                        checkBoxFilterSource.IsChecked = true;
-                        temp = commandLine[++i].ToUpper();
-                        if (temp == "SHOW")
-                        {
-                            radioButtonFilterSourceShow.IsChecked = true;
-                            textBoxFilterSourceShow.Text = commandLine[++i];
-                        }
-                        else if (temp == "DONT")
-                        {
-                            radioButtonFilterSourceDont.IsChecked = true;
-                            textBoxFilterSourceDont.Text = commandLine[++i]; ;
-                        }
-                        break;
-                    case "-FILTERMSG":
-                    case "-FILTERMESSAGE":
-                        if (i + 2 >= commandLine.Length)
-                        {
-                            MessageBox.Show("Not enough parameters for filterMsg");
-                            break;
-                        }
-                        checkBoxFilterMessage.IsChecked = true;
-                        temp = commandLine[++i].ToUpper();
-                        if (temp == "SHOW")
-                        {
-                            radioButtonFilterMsgShow.IsChecked = true;
-                            textBoxFilterMsgShow.Text = commandLine[++i];
-                        }
-                        else if (temp == "DONT")
-                        {
-                            radioButtonFilterMsgDont.IsChecked = true;
-                            textBoxFilterMsgDont.Text = commandLine[++i];
-                        }
-                        break;
-                    case "-MINIMIZED":
-                    case "-M":
-                        minimized = true;
-                        break;
-
-                    default: MessageBox.Show("Invalid args!"); return;
-                }
-            }
-            if (directStart)
-            {
-                startButton_Click(null, null);
-            }
-            if (minimized)
-            {
-                ShowTrayIcon(true);
-                if (isRunning && local)
-                {
-                    m_notifyIcon.Text = appName + " (local)";
-                }
-                else if (isRunning && !local)
-                {
-                    m_notifyIcon.Text = appName + " (" + host + ")";
-                }
-                else
-                {
-                    m_notifyIcon.Text = appName + " (not connected)";
-                }
-                WindowState = WindowState.Minimized;
-                mainWindow.Visibility = Visibility.Hidden;
-
-            }
-             * */
-        }
+        }  
 
         private void hideNow(object source, EventArgs e ) {
             WindowState = WindowState.Minimized;
             
         }
+        #endregion
 
         private void chooseFolder_Click(object sender, RoutedEventArgs e)
         {
@@ -620,7 +191,7 @@ System.Windows.Media.Color.FromRgb(255, 255, 255)
             System.Windows.Forms.DialogResult result = folderBrowser.ShowDialog();
             if (result == System.Windows.Forms.DialogResult.OK)
             {
-                toBeWatchedFolder = folderBrowser.SelectedPath;
+                Properties.Settings.Default.folder = folderBrowser.SelectedPath;
                 textBoxPath.Text = folderBrowser.SelectedPath;
             }
 
@@ -628,24 +199,29 @@ System.Windows.Media.Color.FromRgb(255, 255, 255)
 
         private void textFieldWatchedFolder_TextChanged(object sender, TextChangedEventArgs e)
         {
-            System.Windows.Controls.TextBox temp = (System.Windows.Controls.TextBox)sender;
-            if (Directory.Exists(temp.Text))
+            TextBox textbox = sender as TextBox;
+            if (Directory.Exists(textbox.Text))
             {
                 startButton.IsEnabled = true;
-                startButton.Background = new System.Windows.Media.SolidColorBrush(
-System.Windows.Media.Color.FromRgb(0, 150, 0)
-                                   );
+                startButton.Background = Brushes.Green;
                 startButton.Content = "Start watching";
             }
             else
             {
                 startButton.IsEnabled = false;
-                startButton.Background = new System.Windows.Media.SolidColorBrush(
-System.Windows.Media.Color.FromRgb(150, 150, 150)
-                                   );
+                startButton.Background = Brushes.Gray;
                 startButton.Content = "Choose folder first";
                 
             }
+        }
+
+        private void buttonLicense_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                System.Diagnostics.Process.Start("http://tlhan-ghun.de");
+            }
+            catch { }
         }
     }
 
