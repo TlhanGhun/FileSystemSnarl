@@ -219,7 +219,7 @@ namespace FileSystemSnarl
         {
             try
             {
-                System.Diagnostics.Process.Start("http://tlhan-ghun.de");
+                System.Diagnostics.Process.Start("http://www.opensource.org/licenses/BSD-3-Clause");
             }
             catch { }
         }

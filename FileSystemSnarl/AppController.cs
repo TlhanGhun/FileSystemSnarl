@@ -28,6 +28,7 @@ namespace FileSystemSnarl
 
         public Snarl.SnarlInterface snarl { get; set; }
         public SnarlNetwork.SnarlNetwork snarlNetwork { get; set; }
+        private Dictionary<int, string> snarlSentNotifications { get; set; }
 
         public string IconPath { get; set; }
 
@@ -40,6 +41,14 @@ namespace FileSystemSnarl
 
         public MainWindow mainWindow { get; set; }
 
+        enum SnarlActions
+        {
+            OpeninExplorer,
+            Execute,
+            Delete,
+            CopyPathToClipboard,
+            CopyFilenameToClipboard
+        }
 
         #region Startup and initialization
 
@@ -54,6 +63,7 @@ namespace FileSystemSnarl
 
         private AppController()
         {
+            snarlSentNotifications = new Dictionary<int, string>();
             snarl = new Snarl.SnarlInterface();
             snarl.CallbackEvent += new SnarlInterface.CallbackEventHandler(snarl_CallbackEvent);
             snarl.GlobalSnarlEvent +=new SnarlInterface.GlobalEventHandler(snarl_GlobalSnarlEvent);
@@ -297,7 +307,11 @@ namespace FileSystemSnarl
 
             if (Properties.Settings.Default.snarlLocal)
             {
-                AppController.Current.snarl.Notify(alertClass, title, body, Properties.Settings.Default.displayTime, AppController.Current.IconPath, null);
+                int msgToken = AppController.Current.snarl.Notify(alertClass, title, body, Properties.Settings.Default.displayTime, AppController.Current.IconPath, null);
+                if (msgToken != 0 && !AppController.Current.snarlSentNotifications.ContainsKey(msgToken) && e.ChangeType != WatcherChangeTypes.Deleted)
+                {
+                    memorizeTokenAndPath(msgToken, e.FullPath);
+                }
             }
             else
             {
@@ -306,6 +320,24 @@ namespace FileSystemSnarl
             AppController.Current.lastType = e.ChangeType.ToString();
             AppController.Current.lastFilename = e.Name;
             AppController.Current.lastNotification = DateTime.Now;
+
+        }
+
+        private static void memorizeTokenAndPath(int msgToken, string fullpath)
+        {
+            try
+            {
+                AppController.Current.snarlSentNotifications.Add(msgToken, fullpath);
+                AppController.Current.snarl.AddAction(msgToken, "Open in Explorer", "@" + (int)SnarlActions.OpeninExplorer);
+                AppController.Current.snarl.AddAction(msgToken, "Execute", "@" + (int)SnarlActions.Execute);
+                AppController.Current.snarl.AddAction(msgToken, "Delete immediately", "@" + (int)SnarlActions.Delete);
+                AppController.Current.snarl.AddAction(msgToken, "Copy full path to clipboard", "@" + (int)SnarlActions.CopyPathToClipboard);
+                AppController.Current.snarl.AddAction(msgToken, "Copy filename to clipboard", "@" + (int)SnarlActions.CopyFilenameToClipboard);
+            }
+            catch
+            {
+                // just in case...
+            }
 
         }
 
@@ -358,7 +390,11 @@ namespace FileSystemSnarl
 
             if (Properties.Settings.Default.snarlLocal)
             {
-                AppController.Current.snarl.Notify("File has been renamed", title, body, Properties.Settings.Default.displayTime, AppController.Current.IconPath, null);
+                int msgToken = AppController.Current.snarl.Notify("File has been renamed", title, body, Properties.Settings.Default.displayTime, AppController.Current.IconPath, null);
+                if (msgToken != 0 && !AppController.Current.snarlSentNotifications.ContainsKey(msgToken) && e.ChangeType != WatcherChangeTypes.Deleted)
+                {
+                    memorizeTokenAndPath(msgToken, e.FullPath);
+                }
             }
             else
             {
@@ -378,7 +414,7 @@ namespace FileSystemSnarl
                     snarl.CallbackEvent += new SnarlInterface.CallbackEventHandler(snarl_CallbackEvent);
                     snarl.GlobalSnarlEvent += new SnarlInterface.GlobalEventHandler(snarl_GlobalSnarlEvent);
                 }
-                snarl.RegisterWithEvents("FileSystemSnarl", "FileSystemSnarl", IconPath,"fgvh54546bg54", IntPtr.Zero, 59);
+                snarl.RegisterWithEvents("FileSystemSnarl", "FileSystemSnarl", IconPath,"fgvh54546bg54", IntPtr.Zero, null);
 
                 snarl.AddClass("File has been created", "File has been created");
                 snarl.AddClass("File has been changed", "File has been changed");
@@ -405,7 +441,77 @@ namespace FileSystemSnarl
         }
         void snarl_CallbackEvent(SnarlInterface sender, SnarlInterface.CallbackEventArgs args)
         {
-            return;
+            switch (args.SnarlEvent)
+            {
+                case SnarlInterface.SnarlStatus.NotifyAction:
+                    HandleActionCallback(args.Parameter, args.MessageToken);
+                    break;
+
+                case SnarlInterface.SnarlStatus.CallbackInvoked:
+                case SnarlInterface.SnarlStatus.CallbackClosed:
+                case SnarlInterface.SnarlStatus.CallbackMiddleClick:
+                case SnarlInterface.SnarlStatus.CallbackTimedOut:
+                    if (snarlSentNotifications.ContainsKey(args.MessageToken))
+                    {
+                        try
+                        {
+                            snarlSentNotifications.Remove(args.MessageToken);
+                        }
+                        catch { }
+                    }
+                    break;
+            }
+        }
+
+        private void HandleActionCallback(UInt16 actionData, int msgToken)
+        {
+            if (snarlSentNotifications.ContainsKey(msgToken))
+            {
+                switch ((SnarlActions)actionData)
+                {
+                    case SnarlActions.OpeninExplorer:
+                            string argument = @"/select, " + snarlSentNotifications[msgToken];
+                            try
+                            {
+                                System.Diagnostics.Process.Start("explorer.exe", argument);
+                            }
+                            catch { }
+                        break;
+
+                    case SnarlActions.Execute:
+                        try
+                        {
+                            System.Diagnostics.Process.Start(snarlSentNotifications[msgToken]);
+                        }
+                        catch { }
+                        break;
+
+                    case SnarlActions.Delete:
+                        try
+                        {
+                            File.Delete(snarlSentNotifications[msgToken]);
+                        }
+                        catch { }
+                        break;
+
+                    case SnarlActions.CopyPathToClipboard:
+                        try
+                        {
+                            System.Windows.Forms.Clipboard.SetText(snarlSentNotifications[msgToken]);
+                        }
+                        catch { }
+                        break;
+
+                    case SnarlActions.CopyFilenameToClipboard:
+                        try
+                        {
+                            string filename = Path.GetFileName(snarlSentNotifications[msgToken]);
+                            System.Windows.Forms.Clipboard.SetText(filename);
+                        }
+                        catch { }
+                        break;
+                }
+            }
         }
 
 

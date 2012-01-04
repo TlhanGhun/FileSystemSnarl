@@ -1,9 +1,0 @@
-1.2
-(a little bit) better window design
-fixed issue icon not being displayed / used
-
-1.1
-Setup added
-
-1.0
-Initial release

@@ -96,8 +96,8 @@
                 
             </Grid>
         </GroupBox>
-     
-            <Button Name="buttonLicense" Margin="6,6,6,0" Height="32" VerticalAlignment="Bottom" Visibility="Visible" Grid.Row="1" ForceCursor="False" Click="buttonLicense_Click">Licensed under GPL, see http://tlhan-ghun.de/</Button>
+
+            <Button Name="buttonLicense" Margin="6,6,6,0" Height="32" VerticalAlignment="Bottom" Visibility="Visible" Grid.Row="1" ForceCursor="False" Click="buttonLicense_Click">Licensed under BSD 3-Clause License</Button>
 </StackPanel>
 
         <StackPanel Name="stackPanelTemplates"  Orientation="Vertical" Grid.Column="1">
