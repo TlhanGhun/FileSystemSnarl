@@ -346,5 +346,29 @@ namespace FileSystemSnarl.Properties {
                 this["templateFullContentMaxLength"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool activateOnStartup {
+            get {
+                return ((bool)(this["activateOnStartup"]));
+            }
+            set {
+                this["activateOnStartup"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool minimizeToTrayOnStartup {
+            get {
+                return ((bool)(this["minimizeToTrayOnStartup"]));
+            }
+            set {
+                this["minimizeToTrayOnStartup"] = value;
+            }
+        }
     }
 }

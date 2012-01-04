@@ -55,6 +55,9 @@ namespace FileSystemSnarl
         private AppController()
         {
             snarl = new Snarl.SnarlInterface();
+            snarl.CallbackEvent += new SnarlInterface.CallbackEventHandler(snarl_CallbackEvent);
+            snarl.GlobalSnarlEvent +=new SnarlInterface.GlobalEventHandler(snarl_GlobalSnarlEvent);
+
             watcher = new System.IO.FileSystemWatcher();
             lastNotification = DateTime.Now;
 
@@ -66,10 +69,22 @@ namespace FileSystemSnarl
 
         }
 
+
+
         public void openMainWindow() {
             
             mainWindow = new MainWindow();
             mainWindow.Show();
+
+            if (Properties.Settings.Default.activateOnStartup && mainWindow.startButton.IsEnabled)
+            {
+                startWatching();
+            }
+
+            if (Properties.Settings.Default.minimizeToTrayOnStartup)
+            {
+                mainWindow.hideNow(null,null);
+            }
         }
 
         ~AppController() {
@@ -102,7 +117,7 @@ namespace FileSystemSnarl
                 }
                 isRunning = true;
                 mainWindow.startButton.Content = "Stop watching";
-                mainWindow.startButton.Background = System.Windows.Media.Brushes.GreenYellow;
+                mainWindow.startButton.Background = System.Windows.Media.Brushes.Red;
 
                 mainWindow.radioButtonUseLocalNotifications.IsEnabled = false;
                 mainWindow.radioButtonUseSnpNotifications.IsEnabled = false;
@@ -126,28 +141,7 @@ namespace FileSystemSnarl
 
                 mainWindow.chooseFolder.IsEnabled = false;
 
-            if (Properties.Settings.Default.snarlLocal)
-            {
-                if (snarl == null)
-                {
-                    snarl = new SnarlInterface();
-                }
-                snarl.Register("FileSystemSnarl", "FileSystemSnarl", IconPath);
-
-                snarl.AddClass("File has been created","File has been created");
-                snarl.AddClass("File has been changed", "File has been changed");
-                snarl.AddClass("File has been renamed", "File has been renamed");
-                snarl.AddClass("File has been deleted", "File has been deleted");
-                }
-                else
-                {
-                    snarlNetwork = new SnarlNetwork.SnarlNetwork(Properties.Settings.Default.snpIp, Properties.Settings.Default.snpPort);
-                    snarlNetwork.register(Properties.Settings.Default.snpIp, Properties.Settings.Default.snpPort, "FileSystemSnarl");
-                    snarlNetwork.addClass(Properties.Settings.Default.snpIp, Properties.Settings.Default.snpPort, "FileSystemSnarl", "File has been created", "File has been created");
-                    snarlNetwork.addClass(Properties.Settings.Default.snpIp, Properties.Settings.Default.snpPort, "FileSystemSnarl", "File has been changed", "File has been changed");
-                    snarlNetwork.addClass(Properties.Settings.Default.snpIp, Properties.Settings.Default.snpPort, "FileSystemSnarl", "File has been renamed", "File has been renamed");
-                    snarlNetwork.addClass(Properties.Settings.Default.snpIp, Properties.Settings.Default.snpPort, "FileSystemSnarl", "File has been deleted", "File has been deleted");
-                }
+                RegisterWithSnarl();
 
                 watcher.Path = Properties.Settings.Default.folder;
 
@@ -373,6 +367,48 @@ namespace FileSystemSnarl
         }
 
         #endregion
+
+        public void RegisterWithSnarl()
+        {
+            if (Properties.Settings.Default.snarlLocal)
+            {
+                if (snarl == null)
+                {
+                    snarl = new SnarlInterface();
+                    snarl.CallbackEvent += new SnarlInterface.CallbackEventHandler(snarl_CallbackEvent);
+                    snarl.GlobalSnarlEvent += new SnarlInterface.GlobalEventHandler(snarl_GlobalSnarlEvent);
+                }
+                snarl.RegisterWithEvents("FileSystemSnarl", "FileSystemSnarl", IconPath,"fgvh54546bg54", IntPtr.Zero, 59);
+
+                snarl.AddClass("File has been created", "File has been created");
+                snarl.AddClass("File has been changed", "File has been changed");
+                snarl.AddClass("File has been renamed", "File has been renamed");
+                snarl.AddClass("File has been deleted", "File has been deleted");
+            }
+            else
+            {
+                snarlNetwork = new SnarlNetwork.SnarlNetwork(Properties.Settings.Default.snpIp, Properties.Settings.Default.snpPort);
+                snarlNetwork.register(Properties.Settings.Default.snpIp, Properties.Settings.Default.snpPort, "FileSystemSnarl");
+                snarlNetwork.addClass(Properties.Settings.Default.snpIp, Properties.Settings.Default.snpPort, "FileSystemSnarl", "File has been created", "File has been created");
+                snarlNetwork.addClass(Properties.Settings.Default.snpIp, Properties.Settings.Default.snpPort, "FileSystemSnarl", "File has been changed", "File has been changed");
+                snarlNetwork.addClass(Properties.Settings.Default.snpIp, Properties.Settings.Default.snpPort, "FileSystemSnarl", "File has been renamed", "File has been renamed");
+                snarlNetwork.addClass(Properties.Settings.Default.snpIp, Properties.Settings.Default.snpPort, "FileSystemSnarl", "File has been deleted", "File has been deleted");
+            }
+        }
+
+        void snarl_GlobalSnarlEvent(SnarlInterface sender, SnarlInterface.GlobalEventArgs args)
+        {
+            if (args.GlobalEvent == SnarlInterface.GlobalEvent.SnarlLaunched && isRunning)
+            {
+                RegisterWithSnarl();
+            }
+        }
+        void snarl_CallbackEvent(SnarlInterface sender, SnarlInterface.CallbackEventArgs args)
+        {
+            return;
+        }
+
+
 
         #region Helper stuff
 

@@ -18,28 +18,31 @@
         <StackPanel Name="stackPanelSettings"  Orientation="Vertical" Grid.Column="0">
             <TextBlock Name="textblockHeaderSettings" Text="Settings" Margin="6,6,6,0" FontWeight="ExtraBold" FontSize="15" />
             <GroupBox Header="Snarl settings" Margin="6,8,6,0" Name="groupBoxSnarl"  Background="WhiteSmoke">
-          
-            <Grid Height="100">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="87*" />
-                    <ColumnDefinition Width="101*" />
-                </Grid.ColumnDefinitions>
-                <TextBox Text="{Binding Path=Default.displayTime,Mode=TwoWay}" Height="30" Margin="153,6,0,0" Name="fieldDisplayTime" VerticalAlignment="Top" VerticalContentAlignment="Center" Visibility="Visible" TextChanged="fieldDisplayTime_TextChanged" Grid.Column="1" HorizontalAlignment="Left" Width="36"></TextBox>
-                <Label Height="30" Margin="12,6,65,0" Name="label3" VerticalAlignment="Top" IsEnabled="True" Grid.Column="1">Display time (seconds)</Label>
-                <RadioButton Margin="12,12,0,0" Name="radioButtonUseLocalNotifications" IsChecked="True" GroupName="LocalOrRemote" Checked="radioButtonUseLocalNotifications_Checked" Height="14" HorizontalAlignment="Left" VerticalAlignment="Top" Width="105" IsEnabled="True">Local</RadioButton>
-                <RadioButton Margin="11,32,0,0" Name="radioButtonUseSnpNotifications" HorizontalAlignment="Left" Width="119" GroupName="LocalOrRemote" Checked="radioButtonUseSnpNotifications_Checked" IsEnabled="True" Height="16.3" VerticalAlignment="Top">Remote</RadioButton>
-                <Label Margin="33,46,65.33,31" Name="labelIp">Forward to IP</Label>
-                <Label Margin="33,65,51.33,8" Name="labelPort">Forward to port</Label>
-                <TextBox 
+                    <Grid Height="120">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="87*" />
+                            <ColumnDefinition Width="101*" />
+                        </Grid.ColumnDefinitions>
+                        <TextBox Text="{Binding Path=Default.displayTime,Mode=TwoWay}" Height="30" Margin="153,6,0,0" Name="fieldDisplayTime" VerticalAlignment="Top" VerticalContentAlignment="Center" Visibility="Visible" TextChanged="fieldDisplayTime_TextChanged" Grid.Column="1" HorizontalAlignment="Left" Width="36"></TextBox>
+                        <Label Height="30" Margin="12,6,65,0" Name="label3" VerticalAlignment="Top" IsEnabled="True" Grid.Column="1">Display time (seconds)</Label>
+                        <RadioButton Margin="12,12,0,0" Name="radioButtonUseLocalNotifications" IsChecked="True" GroupName="LocalOrRemote" Checked="radioButtonUseLocalNotifications_Checked" Height="14" HorizontalAlignment="Left" VerticalAlignment="Top" Width="105" IsEnabled="True">Local</RadioButton>
+                        <RadioButton Margin="11,32,0,0" Name="radioButtonUseSnpNotifications" HorizontalAlignment="Left" Width="119" GroupName="LocalOrRemote" Checked="radioButtonUseSnpNotifications_Checked" IsEnabled="True" Height="16.3" VerticalAlignment="Top">Remote</RadioButton>
+                        <Label Margin="33,46,65.33,0" Name="labelIp" Height="23" VerticalAlignment="Top">Forward to IP</Label>
+                        <Label Margin="33,65,51.33,0" Name="labelPort" Height="27" VerticalAlignment="Top">Forward to port</Label>
+                        <TextBox 
                     Text="{Binding Path=Default.snpIp,Mode=TwoWay}"
-                    Margin="123.33,46,0,31" Name="targetIP" TextChanged="targetIP_TextChanged" IsEnabled="True" Grid.ColumnSpan="2" HorizontalAlignment="Left" Width="124"></TextBox>
-                <TextBox 
+                    Margin="123.33,46,0,0" Name="targetIP" TextChanged="targetIP_TextChanged" IsEnabled="True" Grid.ColumnSpan="2" HorizontalAlignment="Left" Width="124" Height="23" VerticalAlignment="Top"></TextBox>
+                        <TextBox 
                     Text="{Binding Path=Default.snpPort,Mode=TwoWay}"
-                    Margin="123,0,0,14" Name="targetPort" TextChanged="targetPort_TextChanged" IsEnabled="True" Grid.ColumnSpan="2" Height="21" VerticalAlignment="Bottom" HorizontalAlignment="Left" Width="124"></TextBox>
-                <Button Margin="56,42,13,8" Name="startButton" Click="startButton_Click" Foreground="Black" Background="DarkGray" IsEnabled="False" Grid.Column="1">Choose folder first</Button>
+                    Margin="123,65,0,0" Name="targetPort" TextChanged="targetPort_TextChanged" IsEnabled="True" Grid.ColumnSpan="2" Height="21" VerticalAlignment="Top" HorizontalAlignment="Left" Width="124"></TextBox>
+                        <Button Margin="56,42,13,0" Name="startButton" Click="startButton_Click" Foreground="Black" Background="DarkGray" IsEnabled="False" Grid.Column="1" Height="50" VerticalAlignment="Top">Choose folder first</Button>
+                    <StackPanel Orientation="Horizontal" Name="stackpanelStartupOptions" Margin="6,0,4,0" VerticalAlignment="Bottom" Grid.ColumnSpan="2">
+                        <CheckBox Name="checkboxActivateOnStartup" IsChecked="{Binding Path=Default.activateOnStartup,Mode=TwoWay}">Activate on startup if settings are valid</CheckBox>
+                        <CheckBox Name="checkboxMinimizeOnStartup" IsChecked="{Binding Path=Default.minimizeToTrayOnStartup,Mode=TwoWay}" Margin="8,0,0,0">Minimize to tray on startup</CheckBox>
+                    </StackPanel>
+                </Grid>
 
-            </Grid>
-        </GroupBox>
+            </GroupBox>
         
         <GroupBox Grid.RowSpan="2" Header="Folder settings" Margin="6,6,6,0" Name="groupBoxFolder" Height="119" VerticalAlignment="Top" Background="WhiteSmoke">
             <Grid Height="81">

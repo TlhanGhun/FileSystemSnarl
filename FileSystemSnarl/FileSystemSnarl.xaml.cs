@@ -177,7 +177,7 @@ namespace FileSystemSnarl
                 m_notifyIcon.Visible = show;
         }  
 
-        private void hideNow(object source, EventArgs e ) {
+        public void hideNow(object source, EventArgs e ) {
             WindowState = WindowState.Minimized;
             
         }
